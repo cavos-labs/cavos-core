@@ -6,18 +6,18 @@ import {
   decryptSecretWithPin,
   formatAmount,
   parseResponse,
-} from "../../../../lib/utils";
+} from "../../../../../../lib/utils";
 import { toBeHex } from "ethers";
-import { validateRequest, withCORS } from "../../../../lib/authUtils";
+import { validateRequest, withCORS } from "../../../../../../lib/authUtils";
 
 export async function POST(req: Request) {
   console.log(
-    `[${new Date().toISOString()}] [POST] /api/v1/vesu/position hit, START.`
+    `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create hit, START.`
   );
   const auth = validateRequest(req);
   if (!auth.valid) {
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, UNAUTHORIZED.`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, UNAUTHORIZED.`
     );
     return auth.response;
   }
@@ -25,14 +25,14 @@ export async function POST(req: Request) {
   try {
     const { amount, address, hashedPk, hashedPin } = await req.json();
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, REQUEST_RECEIVED: ${JSON.stringify(
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, REQUEST_RECEIVED: ${JSON.stringify(
         { amount, address }
       )}`
     );
 
     if (!amount || !address || !hashedPk || !hashedPin) {
       console.log(
-        `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, MISSING_PARAMETERS: ${JSON.stringify(
+        `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, MISSING_PARAMETERS: ${JSON.stringify(
           {
             amount,
             address,
@@ -54,13 +54,13 @@ export async function POST(req: Request) {
     }
 
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, DECRYPTING_CREDENTIALS.`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, DECRYPTING_CREDENTIALS.`
     );
     const pin = decryptPin(hashedPin, process.env.SECRET_TOKEN);
     const pk = decryptSecretWithPin(hashedPk, pin);
 
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, INITIALIZING_PROVIDER.`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, INITIALIZING_PROVIDER.`
     );
     const provider = new RpcProvider({ nodeUrl: process.env.RPC });
     const account = new Account(provider, address, pk);
@@ -85,13 +85,13 @@ export async function POST(req: Request) {
 
     calls = formatCall(calls);
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, CALLS_FORMATTED: ${JSON.stringify(
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, CALLS_FORMATTED: ${JSON.stringify(
         calls
       )}`
     );
 
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, REQUESTING_TYPED_DATA.`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, REQUESTING_TYPED_DATA.`
     );
     const typedDataResponse = await fetch(
       "https://starknet.api.avnu.fi/paymaster/v1/build-typed-data",
@@ -112,18 +112,18 @@ export async function POST(req: Request) {
     if (!typedDataResponse.ok) {
       const errorText = await typedDataResponse.text();
       console.log(
-        `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, TYPED_DATA_BUILD_FAILED: ${errorText}`
+        `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, TYPED_DATA_BUILD_FAILED: ${errorText}`
       );
       throw new Error(`API error building typed data: ${errorText}`);
     }
 
     const typedData: TypedData = await parseResponse(typedDataResponse);
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, TYPED_DATA_RECEIVED.`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, TYPED_DATA_RECEIVED.`
     );
 
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, SIGNING_MESSAGE.`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, SIGNING_MESSAGE.`
     );
     let userSignature = await account.signMessage(typedData);
 
@@ -137,7 +137,7 @@ export async function POST(req: Request) {
     }
 
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, SENDING_TO_EXECUTE.`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, SENDING_TO_EXECUTE.`
     );
     const executeResponse = await fetch(
       "https://starknet.api.avnu.fi/paymaster/v1/execute",
@@ -160,26 +160,26 @@ export async function POST(req: Request) {
     if (!executeResponse.ok) {
       const errorText = await executeResponse.text();
       console.log(
-        `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, TRANSACTION_EXECUTION_FAILED: ${errorText}`
+        `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, TRANSACTION_EXECUTION_FAILED: ${errorText}`
       );
       throw new Error(`API error executing transaction: ${errorText}`);
     }
 
     const result = await executeResponse.json();
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, TRANSACTION_EXECUTED: ${JSON.stringify(
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, TRANSACTION_EXECUTED: ${JSON.stringify(
         result
       )}`
     );
 
     if (!result.transactionHash) {
       console.log(
-        `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, MISSING_TRANSACTION_HASH.`
+        `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, MISSING_TRANSACTION_HASH.`
       );
       throw new Error("Transaction hash missing in response");
     }
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, FINISH.`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, FINISH.`
     );
     return withCORS(
       NextResponse.json({
@@ -188,7 +188,7 @@ export async function POST(req: Request) {
     );
   } catch (error: any) {
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position, ERROR: ${
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/usd/create, ERROR: ${
         error.message || error
       }`
     );

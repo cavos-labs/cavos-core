@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
-import { RpcProvider, Call, Account, TypedData, cairo } from "starknet";
+import { RpcProvider, Call, Account, TypedData } from "starknet";
 import { formatCall } from "@avnu/gasless-sdk";
-
 import { toBeHex } from "ethers";
-import axios from "axios";
 import {
   decryptPin,
   decryptSecretWithPin,
+  formatAmount,
   parseResponse,
 } from "../../../../../../lib/utils";
 
@@ -15,13 +14,14 @@ const SECRET_TOKEN = process.env.SECRET_TOKEN;
 
 export async function POST(req: Request) {
   console.log(
-    `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw hit, START.`
+    `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create hit, START.`
   );
+
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       console.log(
-        `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, UNAUTHORIZED: Missing or malformed Authorization header`
+        `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create, UNAUTHORIZED: Missing or malformed Authorization header`
       );
       return NextResponse.json(
         { message: "Unauthorized: Missing or invalid Bearer token" },
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     const token = authHeader.split(" ")[1];
     if (token !== CAVOS_TOKEN) {
       console.log(
-        `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, UNAUTHORIZED: Invalid Bearer token provided`
+        `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create, UNAUTHORIZED: Invalid bearer token provided`
       );
       return NextResponse.json(
         { message: "Unauthorized: Invalid Bearer token" },
@@ -40,55 +40,46 @@ export async function POST(req: Request) {
       );
     }
 
-    const { address, hashedPk, hashedPin, poolId } = await req.json();
+    const { amount, address, hashedPk, hashedPin } = await req.json();
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, REQUEST_RECEIVED: address=${address}, poolId=${poolId}`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create, REQUEST_RECEIVED: address=${address}, amount=${amount}`
     );
 
     const pin = decryptPin(hashedPin, SECRET_TOKEN);
     const pk = decryptSecretWithPin(hashedPk, pin);
-
     const provider = new RpcProvider({ nodeUrl: process.env.RPC });
-    const userPositions = (
-      await axios.get(
-        `https://api.vesu.xyz/positions?walletAddress=${address}&type=earn`
-      )
-    ).data.data;
-
-    const position = userPositions.find(
-      (item: { type: string; pool: { id: string } }) => item.pool.id === poolId
-    );
-
-    if (!position) {
-      console.log(
-        `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, POSITION_NOT_FOUND: poolId=${poolId}`
-      );
-      return NextResponse.json(
-        { message: "No position found for the given poolId" },
-        { status: 404 }
-      );
-    }
 
     const account = new Account(provider, address, pk);
+    console.log(
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create, ACCOUNT_INITIALIZED.`
+    );
 
     let calls: Call[] = [
       {
         contractAddress:
+          "0x3Fe2b97C1Fd336E750087D68B9b867997Fd64a2661fF3ca5A7C771641e8e7AC",
+        entrypoint: "approve",
+        calldata: [
           "0x00c452bacd439bab4e39aeea190b4ff81f44b019d4b3a25fa4da04a1cae7b6ff",
-        entrypoint: "redeem",
-        calldata: [position.collateralShares.value, "0", address, address],
+          formatAmount(amount, 8),
+        ],
+      },
+      {
+        contractAddress:
+          "0x00c452bacd439bab4e39aeea190b4ff81f44b019d4b3a25fa4da04a1cae7b6ff",
+        entrypoint: "deposit",
+        calldata: [formatAmount(amount, 8), address],
       },
     ];
 
     calls = formatCall(calls);
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, CALLS_FORMATTED: ${JSON.stringify(
-        calls,
-        null,
-        2
-      )}`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create, CALLS_FORMATTED.`
     );
 
+    console.log(
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create, REQUESTING_TYPED_DATA.`
+    );
     const typeDataResponse = await fetch(
       "https://starknet.api.avnu.fi/paymaster/v1/build-typed-data",
       {
@@ -108,19 +99,12 @@ export async function POST(req: Request) {
 
     if (!typeDataResponse.ok) {
       const errorText = await typeDataResponse.text();
-      console.log(
-        `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, TYPED_DATA_ERROR: ${errorText}`
-      );
-      throw new Error(`API error typedata: ${errorText}`);
+      throw new Error(`AVNU typed data API error: ${errorText}`);
     }
 
     const typeData: TypedData = await parseResponse(typeDataResponse);
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, TYPED_DATA_RECEIVED: ${JSON.stringify(
-        typeData,
-        null,
-        2
-      )}`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create, TYPED_DATA_RECEIVED.`
     );
 
     let userSignature = await account.signMessage(typeData);
@@ -132,12 +116,10 @@ export async function POST(req: Request) {
         toBeHex(BigInt(userSignature.s)),
       ];
     }
-    console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, SIGNATURE_COMPLETE: ${JSON.stringify(
-        userSignature
-      )}`
-    );
 
+    console.log(
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create, SIGNING_COMPLETE.`
+    );
     const executeTransaction = await fetch(
       "https://starknet.api.avnu.fi/paymaster/v1/execute",
       {
@@ -158,42 +140,27 @@ export async function POST(req: Request) {
 
     if (!executeTransaction.ok) {
       const errorText = await executeTransaction.text();
-      console.log(
-        `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, EXECUTION_ERROR: ${errorText}`
-      );
-      throw new Error(`Execution API error: ${errorText}`);
+      throw new Error(`AVNU execute API error: ${errorText}`);
     }
 
     const result = await executeTransaction.json();
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, EXECUTION_RESPONSE: ${JSON.stringify(
-        result
-      )}`
-    );
-
-    if (!result.transactionHash) {
-      console.log(
-        `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, MISSING_TRANSACTION_HASH.`
-      );
-      throw new Error("TxHash not found");
-    }
-
-    console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, TRANSACTION_SUCCESSFUL: ${
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create, BTC_POSITION_CREATED: transaction hash=${
         result.transactionHash
       }`
     );
 
+    if (!result.transactionHash) {
+      throw new Error("Response missing transaction hash");
+    }
+
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, FINISH.`
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create, FINISH.`
     );
-    return NextResponse.json({
-      result: result.transactionHash,
-      amount: position.collateral.value / 10 ** 6,
-    });
+    return NextResponse.json({ result: result.transactionHash });
   } catch (error: any) {
     console.log(
-      `[${new Date().toISOString()}] [POST] /api/v1/vesu/positions/btc/withdraw, ERROR: ${
+      `[${new Date().toISOString()}] [POST] /api/v1/vesu/position/btc/create, ERROR: ${
         error.message || error
       }`
     );
