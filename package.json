@@ -1,23 +1,24 @@
 {
-  "name": "cavos-core",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start"
-  },
-  "dependencies": {
-    "@avnu/gasless-sdk": "^0.1.8",
-    "axios": "^1.10.0",
-    "crypto-js": "^4.2.0",
-    "next": "15.3.5",
-    "starknet": "^6.24.1"
-  },
-  "devDependencies": {
-    "@types/crypto-js": "^4.2.2",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "typescript": "^5"
-  }
+	"name": "cavos-core",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "prettier --write \"./**/*.{js,jsx,mjs,cjs,ts,tsx,json}\" & next dev --turbopack",
+		"build": "next build",
+		"start": "next start"
+	},
+	"dependencies": {
+		"@avnu/gasless-sdk": "^0.1.8",
+		"axios": "^1.10.0",
+		"crypto-js": "^4.2.0",
+		"next": "15.3.5",
+		"prettier": "^3.6.2",
+		"starknet": "^6.24.1"
+	},
+	"devDependencies": {
+		"@types/crypto-js": "^4.2.2",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"typescript": "^5"
+	}
 }
