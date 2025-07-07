@@ -1,7 +1,6 @@
-import { ERC20_ABI } from '@/abis/ERC20_ABI';
-import { mockAddresses } from '@/app/lib/utils';
 import { NextResponse } from 'next/server';
 import { RpcProvider, Contract } from 'starknet';
+import { ERC20_ABI } from '../../../../../../abis/ERC20_ABI';
 
 const CAVOS_TOKEN = process.env.CAVOS_TOKEN;
 const WBTC_CONTRACT_ADDRESS =
@@ -10,11 +9,14 @@ const WBTC_CONTRACT_ADDRESS =
 export async function POST(req: Request) {
 	try {
 		console.log(
-			`[${new Date().toISOString()}] [POST] /api/wallet/btc/balance endpoint hit, START.`
+			`[${new Date().toISOString()}] [POST] /api/v1/wallet/btc/balance - Start`
 		);
+
 		const authHeader = req.headers.get('Authorization');
 		if (!authHeader || !authHeader.startsWith('Bearer ')) {
-			console.warn('Authorization header missing or malformed');
+			console.warn(
+				`[${new Date().toISOString()}] [POST] /api/v1/wallet/btc/balance - Unauthorized: Missing or invalid Bearer token`
+			);
 			return NextResponse.json(
 				{ message: 'Unauthorized: Missing or invalid Bearer token' },
 				{ status: 401 }
@@ -23,7 +25,9 @@ export async function POST(req: Request) {
 
 		const token = authHeader.split(' ')[1];
 		if (token !== CAVOS_TOKEN) {
-			console.warn('Invalid Bearer token provided');
+			console.warn(
+				`[${new Date().toISOString()}] [POST] /api/v1/wallet/btc/balance - Unauthorized: Invalid Bearer token`
+			);
 			return NextResponse.json(
 				{ message: 'Unauthorized: Invalid Bearer token' },
 				{ status: 401 }
@@ -32,28 +36,21 @@ export async function POST(req: Request) {
 
 		const { address, tokenAddress = WBTC_CONTRACT_ADDRESS } =
 			await req.json();
-		console.log('Balance request received:', { address, tokenAddress });
 
 		if (!address) {
-			console.warn('Request missing wallet address');
+			console.warn(
+				`[${new Date().toISOString()}] [POST] /api/v1/wallet/btc/balance - Missing wallet address`
+			);
 			return NextResponse.json(
 				{ message: 'Missing wallet address' },
 				{ status: 400 }
 			);
 		}
 
-		if (mockAddresses.includes(address)) {
-			console.log(`Address: ${address} is in the mock test address.`);
-			return NextResponse.json({
-				balance: 2,
-				balanceRaw: '0.00000002',
-			});
-		}
-
 		const nodeUrl = process.env.RPC;
 		if (!nodeUrl) {
 			console.error(
-				'RPC node URL is not defined in environment variables'
+				`[${new Date().toISOString()}] [POST] /api/v1/wallet/btc/balance - RPC configuration missing`
 			);
 			return NextResponse.json(
 				{ message: 'RPC configuration missing' },
@@ -61,35 +58,25 @@ export async function POST(req: Request) {
 			);
 		}
 
-		console.log(`Connecting to RPC provider: ${nodeUrl}`);
 		const provider = new RpcProvider({ nodeUrl });
-
-		console.log(`Instantiating contract at: ${tokenAddress}`);
 		const contract = new Contract(ERC20_ABI, tokenAddress, provider);
-
-		console.log(`Fetching balance for address: ${address}`);
 		const balanceResult = await contract.balance_of(address);
-		console.log(`Raw balance result: ${balanceResult.toString()}`);
 
 		const decimals = 8;
 		const balanceInUnits = Number(balanceResult) / 10 ** decimals;
+
 		console.log(
-			`Formatted balance: ${balanceInUnits} (decimals: ${decimals})`
+			`[${new Date().toISOString()}] [POST] /api/v1/wallet/btc/balance - Success for address: ${address}`
 		);
-		console.log(
-			`[${new Date().toISOString()}] [POST] /api/wallet/btc/balance endpoint, FINISH.`
-		);
+
 		return NextResponse.json({
 			balance: balanceInUnits,
 			balanceRaw: balanceResult.toString(),
 		});
 	} catch (error: any) {
-		console.error('Error fetching balance:', {
-			message: error.message,
-			stack: error.stack,
-			response: error?.response?.data || null,
-		});
-
+		console.error(
+			`[${new Date().toISOString()}] [POST] /api/v1/wallet/btc/balance - Error: ${error.message}`
+		);
 		return NextResponse.json(
 			{ message: error.message || 'Internal Server Error' },
 			{ status: 500 }
