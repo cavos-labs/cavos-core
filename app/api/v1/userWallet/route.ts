@@ -59,7 +59,7 @@ export async function GET(req: Request) {
 		.from('user_wallet')
 		.select('user_id')
 		.eq('address', normalizedAddress)
-		.single();
+		.maybeSingle();
 
 	if (recipientError) {
 		console.log(
@@ -70,6 +70,13 @@ export async function GET(req: Request) {
 				{ message: recipientError.message },
 				{ status: 500 }
 			)
+		);
+	}
+
+	if (!recipientUser) {
+		console.log(`[${now}] [GET] /api/v1/userWallet - User not found.`);
+		return withCORS(
+			NextResponse.json({ message: 'User not found' }, { status: 404 })
 		);
 	}
 
