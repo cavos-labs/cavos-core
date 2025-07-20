@@ -252,31 +252,8 @@ export async function POST(req: Request) {
 		);
 	}
 
-	// Insert phone_number and auth0_id as a new record (if needed)
-	if (profileData.phone_number && profileData.auth0_id) {
-		const { error: insertError } = await supabase
-			.from('user_profile')
-			.insert({
-				phone_number: profileData.phone_number,
-				auth0_id: profileData.auth0_id,
-			});
-
-		if (insertError) {
-			console.log(
-				`[${now}] [POST] /api/v1/userProfile - Supabase error (insert): ${insertError.message}`
-			);
-			// Optionally, you can return here or just log the error and continue
-			return withCORS(
-				NextResponse.json(
-					{ message: insertError.message },
-					{ status: 500 }
-				)
-			);
-		}
-	}
-
 	console.log(
-		`[${now}] [POST] /api/v1/userProfile - Profile upserted and phone number inserted successfully.`
+		`[${now}] [POST] /api/v1/userProfile - Profile upserted successfully.`
 	);
 	return withCORS(NextResponse.json({ profile: data }, { status: 201 }));
 }
