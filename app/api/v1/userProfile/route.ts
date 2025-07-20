@@ -108,17 +108,17 @@ export async function DELETE(req: Request) {
 		);
 	}
 
-	const { error: walletError } = await supabase
+	const { error } = await supabase
 		.from('user_profile')
 		.delete()
 		.eq('auth0_id', user_id);
 
-	if (walletError) {
+	if (error) {
 		console.log(
-			`[${now}] [DELETE] /api/v1/userProfile - Supabase error: ${walletError.message}`
+			`[${now}] [DELETE] /api/v1/userProfile - Supabase error: ${error.message}`
 		);
 		return withCORS(
-			NextResponse.json({ message: walletError.message }, { status: 500 })
+			NextResponse.json({ message: error.message }, { status: 500 })
 		);
 	}
 
