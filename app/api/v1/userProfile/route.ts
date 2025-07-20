@@ -9,11 +9,11 @@ const supabase = createClient(
 
 export async function PUT(req: Request) {
 	const now = new Date().toISOString();
-	console.log(`[${now}] [PUT] /api/v1/username - Request received.`);
+	console.log(`[${now}] [PUT] /api/v1/userProfile - Request received.`);
 
 	const auth = validateRequest(req);
 	if (!auth.valid) {
-		console.log(`[${now}] [PUT] /api/v1/username - Auth invalid.`);
+		console.log(`[${now}] [PUT] /api/v1/userProfile - Auth invalid.`);
 		return auth.response;
 	}
 
@@ -25,7 +25,7 @@ export async function PUT(req: Request) {
 		username = body.username;
 	} catch (e) {
 		console.log(
-			`[${now}] [PUT] /api/v1/username - Invalid or missing JSON body.`
+			`[${now}] [PUT] /api/v1/userProfile - Invalid or missing JSON body.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -37,7 +37,7 @@ export async function PUT(req: Request) {
 
 	if (!user_id || !username) {
 		console.log(
-			`[${now}] [PUT] /api/v1/username - Missing user_id or username.`
+			`[${now}] [PUT] /api/v1/userProfile - Missing user_id or username.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -54,7 +54,7 @@ export async function PUT(req: Request) {
 
 	if (error) {
 		console.log(
-			`[${now}] [PUT] /api/v1/username - Supabase error: ${error.message}`
+			`[${now}] [PUT] /api/v1/userProfile - Supabase error: ${error.message}`
 		);
 		return withCORS(
 			NextResponse.json({ message: error.message }, { status: 500 })
@@ -62,7 +62,7 @@ export async function PUT(req: Request) {
 	}
 
 	console.log(
-		`[${now}] [PUT] /api/v1/username - Username updated successfully.`
+		`[${now}] [PUT] /api/v1/userProfile - Username updated successfully.`
 	);
 	return withCORS(
 		NextResponse.json(
@@ -74,11 +74,11 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
 	const now = new Date().toISOString();
-	console.log(`[${now}] [DELETE] /api/v1/username - Request received.`);
+	console.log(`[${now}] [DELETE] /api/v1/userProfile - Request received.`);
 
 	const auth = validateRequest(req);
 	if (!auth.valid) {
-		console.log(`[${now}] [DELETE] /api/v1/username - Auth invalid.`);
+		console.log(`[${now}] [DELETE] /api/v1/userProfile - Auth invalid.`);
 		return auth.response;
 	}
 
@@ -88,7 +88,7 @@ export async function DELETE(req: Request) {
 		user_id = body.user_id;
 	} catch (e) {
 		console.log(
-			`[${now}] [DELETE] /api/v1/username - Invalid or missing JSON body.`
+			`[${now}] [DELETE] /api/v1/userProfile - Invalid or missing JSON body.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -99,7 +99,7 @@ export async function DELETE(req: Request) {
 	}
 
 	if (!user_id) {
-		console.log(`[${now}] [DELETE] /api/v1/username - Missing user_id.`);
+		console.log(`[${now}] [DELETE] /api/v1/userProfile - Missing user_id.`);
 		return withCORS(
 			NextResponse.json(
 				{ message: 'Missing user_id in request body' },
@@ -115,7 +115,7 @@ export async function DELETE(req: Request) {
 
 	if (walletError) {
 		console.log(
-			`[${now}] [DELETE] /api/v1/username - Supabase error: ${walletError.message}`
+			`[${now}] [DELETE] /api/v1/userProfile - Supabase error: ${walletError.message}`
 		);
 		return withCORS(
 			NextResponse.json({ message: walletError.message }, { status: 500 })
@@ -123,7 +123,7 @@ export async function DELETE(req: Request) {
 	}
 
 	console.log(
-		`[${now}] [DELETE] /api/v1/username - User profile deleted successfully.`
+		`[${now}] [DELETE] /api/v1/userProfile - User profile deleted successfully.`
 	);
 	return withCORS(
 		NextResponse.json(
