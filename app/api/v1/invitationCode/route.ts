@@ -7,10 +7,6 @@ const supabase = createClient(
 	process.env.SUPABASE_ANON_KEY || ''
 );
 
-export async function OPTIONS(req: Request) {
-	return withCORS(new NextResponse(null, { status: 204 }));
-}
-
 export async function GET(req: Request) {
 	const now = new Date().toISOString();
 	console.log(`[${now}] [GET] /api/v1/invitationCode - Request received.`);
@@ -30,7 +26,7 @@ export async function GET(req: Request) {
 			.from('code')
 			.select('*')
 			.eq('auth0_id', user_id)
-			.single();
+			.maybeSingle();
 
 		if (checkError) {
 			console.log(
@@ -40,6 +36,15 @@ export async function GET(req: Request) {
 				NextResponse.json(
 					{ message: checkError.message },
 					{ status: 500 }
+				)
+			);
+		}
+
+		if (!existingCode) {
+			return withCORS(
+				NextResponse.json(
+					{ message: 'Invitation code not found' },
+					{ status: 404 }
 				)
 			);
 		}
@@ -155,4 +160,8 @@ export async function POST(req: Request) {
 			{ status: 201 }
 		)
 	);
+}
+
+export async function OPTIONS(req: Request) {
+	return withCORS(new NextResponse(null, { status: 204 }));
 }
