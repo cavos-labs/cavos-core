@@ -40,7 +40,13 @@ export async function POST(req: Request) {
 		);
 	}
 
-	if (!user_id || amount === undefined || !tx_hash || !type) {
+	if (
+		!user_id ||
+		typeof amount !== 'number' ||
+		isNaN(amount) ||
+		!tx_hash ||
+		!type
+	) {
 		console.log(
 			`[${now}] [POST] /api/v1/transaction - Missing user_id, amount, tx_hash, or type.`
 		);
@@ -48,7 +54,7 @@ export async function POST(req: Request) {
 			NextResponse.json(
 				{
 					message:
-						'Missing user_id, amount, tx_hash, or type in request body',
+						'Missing or invalid user_id, amount, tx_hash, or type in request body',
 				},
 				{ status: 400 }
 			)
