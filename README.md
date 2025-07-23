@@ -32,13 +32,36 @@ cavos-core/
 ├── app/
 │   ├── api/
 │   │   └── v1/
-│   │       ├── cardWaitlist/      # Card waitlist endpoints
-│   │       ├── invitationCode/    # Invitation code endpoints
-│   │       ├── transaction/       # Transaction endpoints
-│   │       ├── userProfile/       # User profile endpoints
-│   │       └── userWallet/        # User wallet endpoints
+│   │       ├── card/
+│   │       │   └── waitlist/           # Card waitlist endpoints
+│   │       ├── invitation/
+│   │       │   └── code/               # Invitation code endpoints
+│   │       ├── transaction/            # Transaction endpoints
+│   │       ├── user/
+│   │       │   ├── profile/            # User profile endpoints
+│   │       │   └── wallet/             # User wallet endpoints
+│   │       ├── vesu/
+│   │       │   ├── pool/
+│   │       │   │   └── apy/            # Vesu pool APY analytics
+│   │       │   ├── position/
+│   │       │   │   ├── btc/
+│   │       │   │   │   ├── create/     # Create BTC position
+│   │       │   │   │   └── withdraw/   # Withdraw BTC position
+│   │       │   │   ├── usd/
+│   │       │   │   │   ├── claim/      # Claim USD position
+│   │       │   │   │   ├── create/     # Create USD position
+│   │       │   │   │   └── withdraw/   # Withdraw USD position
+│   │       │   └── positions/          # List all Vesu positions
+│   │       └── wallet/
+│   │           ├── btc/
+│   │           │   └── balance/        # BTC wallet balance
+│   │           ├── create/             # Create a new wallet
+│   │           └── usd/
+│   │               ├── balance/        # USD wallet balance
+│   │               ├── send/           # Send USD tokens
+│   │               └── swap/           # Swap USD tokens
 │   └── lib/
-│       └── authUtils.ts           # Authentication utilities
+│       └── authUtils.ts                # Authentication utilities
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -46,11 +69,23 @@ cavos-core/
 
 ### Endpoints
 
-- `POST /api/v1/cardWaitlist/...` – Card waitlist operations
-- `POST /api/v1/invitationCode/...` – Invitation code management
-- `POST /api/v1/transaction/...` – Transaction operations
-- `POST /api/v1/userProfile/...` – User profile management
-- `POST /api/v1/userWallet/...` – User wallet operations
+- `POST /api/v1/card/waitlist` – Card waitlist operations
+- `POST /api/v1/invitation/code` – Invitation code management
+- `POST /api/v1/transaction` – Transaction operations
+- `POST /api/v1/user/profile` – User profile management
+- `POST /api/v1/user/wallet` – User wallet operations
+- `POST /api/v1/vesu/pool/apy` – Vesu pool APY analytics
+- `POST /api/v1/vesu/position/btc/create` – Create BTC position
+- `POST /api/v1/vesu/position/btc/withdraw` – Withdraw BTC position
+- `POST /api/v1/vesu/position/usd/create` – Create USD position
+- `POST /api/v1/vesu/position/usd/withdraw` – Withdraw USD position
+- `POST /api/v1/vesu/position/usd/claim` – Claim USD position
+- `POST /api/v1/vesu/positions` – List all Vesu positions
+- `POST /api/v1/wallet/btc/balance` – BTC wallet balance
+- `POST /api/v1/wallet/usd/balance` – USD wallet balance
+- `POST /api/v1/wallet/usd/send` – Send USD tokens
+- `POST /api/v1/wallet/usd/swap` – Swap USD tokens
+- `POST /api/v1/wallet/create` – Create a new wallet
 
 ## License
 
