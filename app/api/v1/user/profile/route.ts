@@ -110,10 +110,11 @@ export async function DELETE(req: Request) {
 		);
 	}
 
-	const { error } = await supabase
+	const { data, error } = await supabase
 		.from('user_profile')
 		.delete()
-		.eq('auth0_id', user_id);
+		.eq('auth0_id', user_id)
+		.select();
 
 	if (error) {
 		console.log(
@@ -121,6 +122,14 @@ export async function DELETE(req: Request) {
 		);
 		return withCORS(
 			NextResponse.json({ message: error.message }, { status: 500 })
+		);
+	}
+	if (!data || data.length === 0) {
+		return withCORS(
+			NextResponse.json(
+				{ message: 'User profile not found' },
+				{ status: 404 }
+			)
 		);
 	}
 
