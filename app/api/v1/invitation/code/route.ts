@@ -56,13 +56,11 @@ export async function GET(req: Request) {
 			NextResponse.json({ code: existingCode }, { status: 200 })
 		);
 	} else if (invitation_code) {
-		// New logic: fetch by invitation_code (case-insensitive)
 		const { data: codeData, error: codeError } = await supabase
 			.from('code')
 			.select('*')
 			.eq('invitation_code', invitation_code.toUpperCase())
-			.single();
-
+			.maybeSingle();
 		if (codeError) {
 			console.log(
 				`[${now}] [GET] /api/v1/invitation/code - Supabase error: ${codeError.message}`
@@ -71,6 +69,14 @@ export async function GET(req: Request) {
 				NextResponse.json(
 					{ message: codeError.message },
 					{ status: 500 }
+				)
+			);
+		}
+		if (!codeData) {
+			return withCORS(
+				NextResponse.json(
+					{ message: 'Invitation code not found' },
+					{ status: 404 }
 				)
 			);
 		}
