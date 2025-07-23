@@ -144,10 +144,26 @@ export async function POST(req: Request) {
 		);
 	}
 
+	// Check if user already has an invitation code
+	const { data: existingCode } = await supabase
+		.from('code')
+		.select('*')
+		.eq('auth0_id', user_id)
+		.maybeSingle();
+	if (existingCode) {
+		return withCORS(
+			NextResponse.json(
+				{ message: 'User already has an invitation code' },
+				{ status: 409 }
+			)
+		);
+	}
+
+	// Normalize invitation code to uppercase
+	const normalizedCode = invitation_code.toUpperCase();
 	const { error: insertError } = await supabase
 		.from('code')
-		.insert([{ auth0_id: user_id, invitation_code }]);
-
+		.insert([{ auth0_id: user_id, invitation_code: normalizedCode }]);
 	if (insertError) {
 		console.log(
 			`[${now}] [POST] /api/v1/invitation/code - Supabase error: ${insertError.message}`
