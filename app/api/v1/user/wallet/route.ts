@@ -24,7 +24,7 @@ export async function GET(req: Request) {
 	if (query) {
 		// Search by user_name (case-insensitive, partial match)
 		const { data, error } = await supabase
-			.from('user_wallet')
+			.from('external_wallet')
 			.select('user_name, address')
 			.ilike('user_name', `%${query.trim()}%`)
 			.not('user_name', 'is', null)
@@ -56,8 +56,8 @@ export async function GET(req: Request) {
 	const normalizedAddress = address.trim().toLowerCase();
 
 	const { data: recipientUser, error: recipientError } = await supabase
-		.from('user_wallet')
-		.select('user_id')
+		.from('external_wallet')
+		.select('*')
 		.eq('address', normalizedAddress)
 		.maybeSingle();
 
