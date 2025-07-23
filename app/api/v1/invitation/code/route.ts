@@ -184,6 +184,71 @@ export async function POST(req: Request) {
 	);
 }
 
+export async function PUT(req: Request) {
+	const now = new Date().toISOString();
+	console.log(`[${now}] [PUT] /api/v1/invitation/code - Request received.`);
+
+	const auth = validateRequest(req);
+	if (!auth.valid) {
+		console.log(`[${now}] [PUT] /api/v1/invitation/code - Auth invalid.`);
+		return auth.response;
+	}
+
+	let invitation_code: string | undefined;
+	let uses: number | undefined;
+	try {
+		const body = await req.json();
+		invitation_code = body.invitation_code;
+		uses = body.uses;
+	} catch (e) {
+		console.log(
+			`[${now}] [PUT] /api/v1/invitation/code - Invalid or missing JSON body.`
+		);
+		return withCORS(
+			NextResponse.json(
+				{ message: 'Invalid or missing JSON body' },
+				{ status: 400 }
+			)
+		);
+	}
+
+	if (!invitation_code || typeof uses !== 'number') {
+		console.log(
+			`[${now}] [PUT] /api/v1/invitation/code - Missing invitation_code or uses.`
+		);
+		return withCORS(
+			NextResponse.json(
+				{ message: 'Missing invitation_code or uses in request body' },
+				{ status: 400 }
+			)
+		);
+	}
+
+	const { error: updateError } = await supabase
+		.from('code')
+		.update({ uses })
+		.eq('invitation_code', invitation_code.toUpperCase());
+
+	if (updateError) {
+		console.log(
+			`[${now}] [PUT] /api/v1/invitation/code - Supabase error: ${updateError.message}`
+		);
+		return withCORS(
+			NextResponse.json({ message: updateError.message }, { status: 500 })
+		);
+	}
+
+	console.log(
+		`[${now}] [PUT] /api/v1/invitation/code - Uses updated successfully.`
+	);
+	return withCORS(
+		NextResponse.json(
+			{ message: 'Uses updated successfully' },
+			{ status: 200 }
+		)
+	);
+}
+
 export async function OPTIONS(req: Request) {
 	return withCORS(new NextResponse(null, { status: 204 }));
 }
