@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { validateRequest, withCORS } from '../../../lib/authUtils';
+import { validateRequest, withCORS } from '../../../../lib/authUtils';
 
 const supabase = createClient(
 	process.env.SUPABASE_URL || '',
@@ -9,11 +9,11 @@ const supabase = createClient(
 
 export async function PUT(req: Request) {
 	const now = new Date().toISOString();
-	console.log(`[${now}] [PUT] /api/v1/userProfile - Request received.`);
+	console.log(`[${now}] [PUT] /api/v1/user/profile - Request received.`);
 
 	const auth = validateRequest(req);
 	if (!auth.valid) {
-		console.log(`[${now}] [PUT] /api/v1/userProfile - Auth invalid.`);
+		console.log(`[${now}] [PUT] /api/v1/user/profile - Auth invalid.`);
 		return auth.response;
 	}
 
@@ -25,7 +25,7 @@ export async function PUT(req: Request) {
 		username = body.username;
 	} catch (e) {
 		console.log(
-			`[${now}] [PUT] /api/v1/userProfile - Invalid or missing JSON body.`
+			`[${now}] [PUT] /api/v1/user/profile - Invalid or missing JSON body.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -37,7 +37,7 @@ export async function PUT(req: Request) {
 
 	if (!user_id || !username) {
 		console.log(
-			`[${now}] [PUT] /api/v1/userProfile - Missing user_id or username.`
+			`[${now}] [PUT] /api/v1/user/profile - Missing user_id or username.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -54,7 +54,7 @@ export async function PUT(req: Request) {
 
 	if (error) {
 		console.log(
-			`[${now}] [PUT] /api/v1/userProfile - Supabase error: ${error.message}`
+			`[${now}] [PUT] /api/v1/user/profile - Supabase error: ${error.message}`
 		);
 		return withCORS(
 			NextResponse.json({ message: error.message }, { status: 500 })
@@ -62,7 +62,7 @@ export async function PUT(req: Request) {
 	}
 
 	console.log(
-		`[${now}] [PUT] /api/v1/userProfile - Username updated successfully.`
+		`[${now}] [PUT] /api/v1/user/profile - Username updated successfully.`
 	);
 	return withCORS(
 		NextResponse.json(
@@ -74,11 +74,11 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
 	const now = new Date().toISOString();
-	console.log(`[${now}] [DELETE] /api/v1/userProfile - Request received.`);
+	console.log(`[${now}] [DELETE] /api/v1/user/profile - Request received.`);
 
 	const auth = validateRequest(req);
 	if (!auth.valid) {
-		console.log(`[${now}] [DELETE] /api/v1/userProfile - Auth invalid.`);
+		console.log(`[${now}] [DELETE] /api/v1/user/profile - Auth invalid.`);
 		return auth.response;
 	}
 
@@ -88,7 +88,7 @@ export async function DELETE(req: Request) {
 		user_id = body.user_id;
 	} catch (e) {
 		console.log(
-			`[${now}] [DELETE] /api/v1/userProfile - Invalid or missing JSON body.`
+			`[${now}] [DELETE] /api/v1/user/profile - Invalid or missing JSON body.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -99,7 +99,9 @@ export async function DELETE(req: Request) {
 	}
 
 	if (!user_id) {
-		console.log(`[${now}] [DELETE] /api/v1/userProfile - Missing user_id.`);
+		console.log(
+			`[${now}] [DELETE] /api/v1/user/profile - Missing user_id.`
+		);
 		return withCORS(
 			NextResponse.json(
 				{ message: 'Missing user_id in request body' },
@@ -115,7 +117,7 @@ export async function DELETE(req: Request) {
 
 	if (error) {
 		console.log(
-			`[${now}] [DELETE] /api/v1/userProfile - Supabase error: ${error.message}`
+			`[${now}] [DELETE] /api/v1/user/profile - Supabase error: ${error.message}`
 		);
 		return withCORS(
 			NextResponse.json({ message: error.message }, { status: 500 })
@@ -123,7 +125,7 @@ export async function DELETE(req: Request) {
 	}
 
 	console.log(
-		`[${now}] [DELETE] /api/v1/userProfile - User profile deleted successfully.`
+		`[${now}] [DELETE] /api/v1/user/profile - User profile deleted successfully.`
 	);
 	return withCORS(
 		NextResponse.json(
@@ -135,11 +137,11 @@ export async function DELETE(req: Request) {
 
 export async function GET(req: Request) {
 	const now = new Date().toISOString();
-	console.log(`[${now}] [GET] /api/v1/userProfile - Request received.`);
+	console.log(`[${now}] [GET] /api/v1/user/profile - Request received.`);
 
 	const auth = validateRequest(req);
 	if (!auth.valid) {
-		console.log(`[${now}] [GET] /api/v1/userProfile - Auth invalid.`);
+		console.log(`[${now}] [GET] /api/v1/user/profile - Auth invalid.`);
 		return auth.response;
 	}
 
@@ -157,19 +159,19 @@ export async function GET(req: Request) {
 
 		if (error) {
 			console.log(
-				`[${now}] [GET] /api/v1/userProfile - Supabase error (list): ${error.message}`
+				`[${now}] [GET] /api/v1/user/profile - Supabase error (list): ${error.message}`
 			);
 			return withCORS(
 				NextResponse.json({ message: error.message }, { status: 500 })
 			);
 		}
 
-		console.log(`[${now}] [GET] /api/v1/userProfile - List success.`);
+		console.log(`[${now}] [GET] /api/v1/user/profile - List success.`);
 		return withCORS(NextResponse.json({ profiles: data }, { status: 200 }));
 	}
 
 	if (!user_id) {
-		console.log(`[${now}] [GET] /api/v1/userProfile - Missing user_id.`);
+		console.log(`[${now}] [GET] /api/v1/user/profile - Missing user_id.`);
 		return withCORS(
 			NextResponse.json(
 				{ message: 'Missing user_id in query parameters' },
@@ -186,14 +188,14 @@ export async function GET(req: Request) {
 
 	if (error) {
 		console.log(
-			`[${now}] [GET] /api/v1/userProfile - Supabase error: ${error.message}`
+			`[${now}] [GET] /api/v1/user/profile - Supabase error: ${error.message}`
 		);
 		return withCORS(
 			NextResponse.json({ message: error.message }, { status: 500 })
 		);
 	}
 
-	console.log(`[${now}] [GET] /api/v1/userProfile - Success.`);
+	console.log(`[${now}] [GET] /api/v1/user/profile - Success.`);
 	return withCORS(
 		NextResponse.json({ username: data?.username }, { status: 200 })
 	);
@@ -201,11 +203,11 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
 	const now = new Date().toISOString();
-	console.log(`[${now}] [POST] /api/v1/userProfile - Request received.`);
+	console.log(`[${now}] [POST] /api/v1/user/profile - Request received.`);
 
 	const auth = validateRequest(req);
 	if (!auth.valid) {
-		console.log(`[${now}] [POST] /api/v1/userProfile - Auth invalid.`);
+		console.log(`[${now}] [POST] /api/v1/user/profile - Auth invalid.`);
 		return auth.response;
 	}
 
@@ -214,7 +216,7 @@ export async function POST(req: Request) {
 		profileData = await req.json();
 	} catch (e) {
 		console.log(
-			`[${now}] [POST] /api/v1/userProfile - Invalid or missing JSON body.`
+			`[${now}] [POST] /api/v1/user/profile - Invalid or missing JSON body.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -226,7 +228,7 @@ export async function POST(req: Request) {
 
 	if (!profileData || !profileData.auth0_id) {
 		console.log(
-			`[${now}] [POST] /api/v1/userProfile - Missing auth0_id in profileData.`
+			`[${now}] [POST] /api/v1/user/profile - Missing auth0_id in profileData.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -245,7 +247,7 @@ export async function POST(req: Request) {
 
 	if (error) {
 		console.log(
-			`[${now}] [POST] /api/v1/userProfile - Supabase error (upsert): ${error.message}`
+			`[${now}] [POST] /api/v1/user/profile - Supabase error (upsert): ${error.message}`
 		);
 		return withCORS(
 			NextResponse.json({ message: error.message }, { status: 500 })
@@ -253,7 +255,7 @@ export async function POST(req: Request) {
 	}
 
 	console.log(
-		`[${now}] [POST] /api/v1/userProfile - Profile upserted successfully.`
+		`[${now}] [POST] /api/v1/user/profile - Profile upserted successfully.`
 	);
 	return withCORS(NextResponse.json({ profile: data }, { status: 201 }));
 }

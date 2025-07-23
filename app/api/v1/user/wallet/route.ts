@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { validateRequest, withCORS } from '../../../lib/authUtils';
+import { validateRequest, withCORS } from '../../../../lib/authUtils';
 
 const supabase = createClient(
 	process.env.SUPABASE_URL || '',
@@ -9,11 +9,11 @@ const supabase = createClient(
 
 export async function GET(req: Request) {
 	const now = new Date().toISOString();
-	console.log(`[${now}] [GET] /api/v1/userWallet - Request received.`);
+	console.log(`[${now}] [GET] /api/v1/user/wallet - Request received.`);
 
 	const auth = validateRequest(req);
 	if (!auth.valid) {
-		console.log(`[${now}] [GET] /api/v1/userWallet - Auth invalid.`);
+		console.log(`[${now}] [GET] /api/v1/user/wallet - Auth invalid.`);
 		return auth.response;
 	}
 
@@ -32,19 +32,19 @@ export async function GET(req: Request) {
 
 		if (error) {
 			console.log(
-				`[${now}] [GET] /api/v1/userWallet - Supabase error (search): ${error.message}`
+				`[${now}] [GET] /api/v1/user/wallet - Supabase error (search): ${error.message}`
 			);
 			return withCORS(
 				NextResponse.json({ message: error.message }, { status: 500 })
 			);
 		}
 
-		console.log(`[${now}] [GET] /api/v1/userWallet - Search success.`);
+		console.log(`[${now}] [GET] /api/v1/user/wallet - Search success.`);
 		return withCORS(NextResponse.json({ results: data }, { status: 200 }));
 	}
 
 	if (!address) {
-		console.log(`[${now}] [GET] /api/v1/userWallet - Missing address.`);
+		console.log(`[${now}] [GET] /api/v1/user/wallet - Missing address.`);
 		return withCORS(
 			NextResponse.json(
 				{ message: 'Missing address in query parameters' },
@@ -63,7 +63,7 @@ export async function GET(req: Request) {
 
 	if (recipientError) {
 		console.log(
-			`[${now}] [GET] /api/v1/userWallet - Supabase error: ${recipientError.message}`
+			`[${now}] [GET] /api/v1/user/wallet - Supabase error: ${recipientError.message}`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -74,13 +74,13 @@ export async function GET(req: Request) {
 	}
 
 	if (!recipientUser) {
-		console.log(`[${now}] [GET] /api/v1/userWallet - User not found.`);
+		console.log(`[${now}] [GET] /api/v1/user/wallet - User not found.`);
 		return withCORS(
 			NextResponse.json({ message: 'User not found' }, { status: 404 })
 		);
 	}
 
-	console.log(`[${now}] [GET] /api/v1/userWallet - Success.`);
+	console.log(`[${now}] [GET] /api/v1/user/wallet - Success.`);
 	return withCORS(
 		NextResponse.json({ user_id: recipientUser?.user_id }, { status: 200 })
 	);

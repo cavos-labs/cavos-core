@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { validateRequest, withCORS } from '../../../lib/authUtils';
+import { validateRequest, withCORS } from '../../../../lib/authUtils';
 
 const supabase = createClient(
 	process.env.SUPABASE_URL || '',
@@ -9,11 +9,11 @@ const supabase = createClient(
 
 export async function GET(req: Request) {
 	const now = new Date().toISOString();
-	console.log(`[${now}] [GET] /api/v1/invitationCode - Request received.`);
+	console.log(`[${now}] [GET] /api/v1/invitation/code - Request received.`);
 
 	const auth = validateRequest(req);
 	if (!auth.valid) {
-		console.log(`[${now}] [GET] /api/v1/invitationCode - Auth invalid.`);
+		console.log(`[${now}] [GET] /api/v1/invitation/code - Auth invalid.`);
 		return auth.response;
 	}
 
@@ -30,7 +30,7 @@ export async function GET(req: Request) {
 
 		if (checkError) {
 			console.log(
-				`[${now}] [GET] /api/v1/invitationCode - Supabase error: ${checkError.message}`
+				`[${now}] [GET] /api/v1/invitation/code - Supabase error: ${checkError.message}`
 			);
 			return withCORS(
 				NextResponse.json(
@@ -50,7 +50,7 @@ export async function GET(req: Request) {
 		}
 
 		console.log(
-			`[${now}] [GET] /api/v1/invitationCode - Success (by user_id).`
+			`[${now}] [GET] /api/v1/invitation/code - Success (by user_id).`
 		);
 		return withCORS(
 			NextResponse.json({ code: existingCode }, { status: 200 })
@@ -65,7 +65,7 @@ export async function GET(req: Request) {
 
 		if (codeError) {
 			console.log(
-				`[${now}] [GET] /api/v1/invitationCode - Supabase error: ${codeError.message}`
+				`[${now}] [GET] /api/v1/invitation/code - Supabase error: ${codeError.message}`
 			);
 			return withCORS(
 				NextResponse.json(
@@ -76,12 +76,12 @@ export async function GET(req: Request) {
 		}
 
 		console.log(
-			`[${now}] [GET] /api/v1/invitationCode - Success (by invitation_code).`
+			`[${now}] [GET] /api/v1/invitation/code - Success (by invitation_code).`
 		);
 		return withCORS(NextResponse.json({ code: codeData }, { status: 200 }));
 	} else {
 		console.log(
-			`[${now}] [GET] /api/v1/invitationCode - Missing parameters.`
+			`[${now}] [GET] /api/v1/invitation/code - Missing parameters.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -97,11 +97,11 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
 	const now = new Date().toISOString();
-	console.log(`[${now}] [POST] /api/v1/invitationCode - Request received.`);
+	console.log(`[${now}] [POST] /api/v1/invitation/code - Request received.`);
 
 	const auth = validateRequest(req);
 	if (!auth.valid) {
-		console.log(`[${now}] [POST] /api/v1/invitationCode - Auth invalid.`);
+		console.log(`[${now}] [POST] /api/v1/invitation/code - Auth invalid.`);
 		return auth.response;
 	}
 
@@ -113,7 +113,7 @@ export async function POST(req: Request) {
 		invitation_code = body.invitation_code;
 	} catch (e) {
 		console.log(
-			`[${now}] [POST] /api/v1/invitationCode - Invalid or missing JSON body.`
+			`[${now}] [POST] /api/v1/invitation/code - Invalid or missing JSON body.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -125,7 +125,7 @@ export async function POST(req: Request) {
 
 	if (!user_id || !invitation_code) {
 		console.log(
-			`[${now}] [POST] /api/v1/invitationCode - Missing user_id or invitation_code.`
+			`[${now}] [POST] /api/v1/invitation/code - Missing user_id or invitation_code.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -144,7 +144,7 @@ export async function POST(req: Request) {
 
 	if (insertError) {
 		console.log(
-			`[${now}] [POST] /api/v1/invitationCode - Supabase error: ${insertError.message}`
+			`[${now}] [POST] /api/v1/invitation/code - Supabase error: ${insertError.message}`
 		);
 		return withCORS(
 			NextResponse.json({ message: insertError.message }, { status: 500 })
@@ -152,7 +152,7 @@ export async function POST(req: Request) {
 	}
 
 	console.log(
-		`[${now}] [POST] /api/v1/invitationCode - Invitation code inserted successfully.`
+		`[${now}] [POST] /api/v1/invitation/code - Invitation code inserted successfully.`
 	);
 	return withCORS(
 		NextResponse.json(

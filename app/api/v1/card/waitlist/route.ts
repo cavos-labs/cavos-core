@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { validateRequest, withCORS } from '../../../lib/authUtils';
+import { validateRequest, withCORS } from '../../../../lib/authUtils';
 
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_ANON_KEY) {
 	throw new Error('Missing required Supabase environment variables');
@@ -12,13 +12,13 @@ const supabase = createClient(
 
 export async function POST(req: Request) {
 	console.log(
-		`[${new Date().toISOString()}] [POST] /api/v1/cardWaitlist hit, START.`
+		`[${new Date().toISOString()}] [POST] /api/v1/card/waitlist hit, START.`
 	);
 
 	const auth = validateRequest(req);
 	if (!auth.valid) {
 		console.log(
-			`[${new Date().toISOString()}] [POST] /api/v1/cardWaitlist, AUTH INVALID.`
+			`[${new Date().toISOString()}] [POST] /api/v1/card/waitlist, AUTH INVALID.`
 		);
 		return auth.response;
 	}
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 		country = body.country;
 	} catch (e) {
 		console.log(
-			`[${new Date().toISOString()}] [POST] /api/v1/cardWaitlist, INVALID JSON BODY.`
+			`[${new Date().toISOString()}] [POST] /api/v1/card/waitlist, INVALID JSON BODY.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
 	if (!email || !country) {
 		console.log(
-			`[${new Date().toISOString()}] [POST] /api/v1/cardWaitlist, MISSING FIELDS.`
+			`[${new Date().toISOString()}] [POST] /api/v1/card/waitlist, MISSING FIELDS.`
 		);
 		return withCORS(
 			NextResponse.json(
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
 
 	if (error) {
 		console.log(
-			`[${new Date().toISOString()}] [POST] /api/v1/cardWaitlist, SUPABASE ERROR: ${error.message}`
+			`[${new Date().toISOString()}] [POST] /api/v1/card/waitlist, SUPABASE ERROR: ${error.message}`
 		);
 		return withCORS(
 			NextResponse.json({ message: error.message }, { status: 500 })
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 	}
 
 	console.log(
-		`[${new Date().toISOString()}] [POST] /api/v1/cardWaitlist, SUCCESS.`
+		`[${new Date().toISOString()}] [POST] /api/v1/card/waitlist, SUCCESS.`
 	);
 	return withCORS(
 		NextResponse.json(
