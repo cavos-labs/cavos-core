@@ -191,7 +191,7 @@ export async function GET(req: Request) {
 
 	const { data, error } = await supabase
 		.from('user_profile')
-		.select('username')
+		.select('*')
 		.eq('auth0_id', user_id)
 		.single();
 
@@ -205,9 +205,7 @@ export async function GET(req: Request) {
 	}
 
 	console.log(`[${now}] [GET] /api/v1/user/profile - Success.`);
-	return withCORS(
-		NextResponse.json({ username: data?.username }, { status: 200 })
-	);
+	return withCORS(NextResponse.json({ data }, { status: 200 }));
 }
 
 export async function POST(req: Request) {
