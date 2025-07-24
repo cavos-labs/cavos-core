@@ -264,7 +264,7 @@ export async function POST(req: Request) {
 	console.log(
 		`[${now}] [POST] /api/v1/user/profile - Profile upserted successfully.`
 	);
-	return withCORS(NextResponse.json({ profile: data }, { status: 201 }));
+	return withCORS(NextResponse.json({ data }, { status: 201 }));
 }
 
 export async function OPTIONS(req: Request) {
