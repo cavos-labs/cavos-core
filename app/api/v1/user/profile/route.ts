@@ -157,6 +157,31 @@ export async function GET(req: Request) {
 	const { searchParams } = new URL(req.url);
 	const user_id = searchParams.get('user_id');
 	const list = searchParams.get('list');
+	const query = searchParams.get('query');
+
+	if (query) {
+		// Search user_wallet by user_name (case-insensitive, partial match)
+		const { data, error } = await supabase
+			.from('user_wallet')
+			.select('user_name, address')
+			.ilike('user_name', `%${query.trim()}%`)
+			.not('user_name', 'is', null)
+			.limit(20);
+
+		if (error) {
+			console.log(
+				`[${now}] [GET] /api/v1/user/profile - Supabase error (wallet search): ${error.message}`
+			);
+			return withCORS(
+				NextResponse.json({ message: error.message }, { status: 500 })
+			);
+		}
+
+		console.log(
+			`[${now}] [GET] /api/v1/user/profile - Wallet search success.`
+		);
+		return withCORS(NextResponse.json({ wallets: data }, { status: 200 }));
+	}
 
 	if (list === '1') {
 		// List up to 100 profiles with username and address, where username is not null
